@@ -1,0 +1,20 @@
+#include "TxLib.h"
+namespace everything {
+    class Interactable { //типа интерфейс
+        public:
+
+        virtual void interact (int type, int power);
+    };
+
+    namespace MassWorker {
+        //
+    }
+
+    using namespace MassWorker;
+}
+
+using namespace everything;
+
+int main () {
+    //
+}

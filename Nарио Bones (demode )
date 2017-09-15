@@ -1,0 +1,109 @@
+#include<txlib.h> //АДИНАДИНАДИН111!!!!!
+
+enum key {UP, DOWN, LEFT, RIGHT, ESCAPE};
+
+struct MobCoorder {
+    int liveCycle, x, y; //структурочка
+};
+
+class Interactable { //типа интерфейс
+    public:
+    void bePushed (int stronge) {}
+
+    void beFired (int stronge) {}
+
+    void beDamaged (int stronge) {}
+
+    void beSwilled (int stronge) {}
+};
+
+class Something : public Interactable { //первый класс
+    protected:
+    HDC textures[];
+    int hitPoints;
+    int id;
+
+    public:
+    virtual void interact(Interactable interacor) = 0;    //взаимодействие
+
+    virtual HDC getTexture() = 0;
+};
+
+class Cube : public Something {
+    public:
+    HDC getTexture() {
+        return textures[0];
+    }
+};
+
+class Mob : public Something {
+    protected:
+    int cycle = 0;
+
+    public:
+    virtual void makeAlive () = 0;
+
+    HDC getTexture () {
+        return textures[cycle];
+    }
+};
+
+class DyMob : public Mob {
+    protected:
+    int x, y, dx, dy, pSpeed;
+
+    public:
+    int getX() {
+        return x;
+    }
+
+    int getY() {
+        return y;
+    }
+
+    int getDx() {
+        return dx;
+    }
+
+    int getDy() {
+        return dy;
+    }
+};
+
+class Nario : public DyMob {
+    private:
+    bool isStanding = false;
+
+    void jump() {
+        if (isStanding && dy < 5) dy += 10;
+    }
+
+    void run (int speed) {
+        if (dx < 5 && dx > -5) dx += speed * pSpeed;
+    }
+
+    public:
+    void keyPressed(key k) {
+            switch (k) {
+            case UP:
+                jump();
+                break;
+
+            case DOWN:
+                break;
+
+            case LEFT:
+                run(-1);
+                break;
+
+            case RIGHT:
+                run(1);
+                break;
+        }
+    }
+};
+
+int main() {
+    int cubes[40][30];
+    int mobs[40][30];
+}
