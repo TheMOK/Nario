@@ -1,20 +1,66 @@
-#include "TxLib.h"
-namespace everything {
-    class Interactable { //типа интерфейс
-        public:
+//#include "TxNetWork.h"
+#include "TxWave.h"                                                                                                    //неудачные дубли
 
-        virtual void interact (int type, int power);
-    };
+class Interactable { //типа интерфейс
+    public:
 
-    namespace MassWorker {
-        //
-    }
+    virtual bool interact   (int type, int force);//Отвечает за взаимодействие объектов
+    virtual bool unInteract (Interactable object);//"Будит" объекты для взаимодействия                                 //virtual bool unInteract () - ответ на взаимодействие
+};
 
-    using namespace MassWorker;
+class Cube: public Interactable {//Собственно, кубы
+    public:
+    //
+};                                                                                                        //namespace MassWorker { - фактический предок класса Game
+
+namespace TxWorker {
+
+bool createWindow(int H, int W) {
+txCreateWindow (H, W);
 }
 
-using namespace everything;
+}
+                                                                                                        //using namespace NameNamespace; - поясняем Руслику за namespac'ы
+class Mob: public Interactable {//Мобы                                                                          //using namespace MassWorker; - фактический предок класса Game
+    public:
+    //
+};                                                                                                            //} - фактический предок класса Game
+
+class Game {//Мейн невиртуальный класс, отвечающий за работу проги
+    private:
+
+    public:
+
+    bool show (/*заполнить позже*/) {
+
+    }                                                                                                       //virtual int truthTest (); - нет необходимости в единой отладочной системе
+    protected:
+
+};
+
+class WinDirector {//Работяга, выполняет почти все технические внеигровые функции в игре
+    private:
+    int winW, winH;
+    Game game;
+    public:
+    WinDirector(int w, int h) {
+        winW = w;
+        winH = h;
+        game = *new Game();
+        createWindow(winW, winH);
+    }
+    private:
+    void createWindow(int w, int h) {
+        TxWorker::createWindow(w, h);
+    }
+
+};
 
 int main () {
     //
 }
+
+
+
+
+
