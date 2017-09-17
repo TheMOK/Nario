@@ -46,7 +46,7 @@ class WinDirector {//Работяга, выполняет почти все те
     WinDirector(int w, int h) {
         winW = w;
         winH = h;
-        game = *new Game();
+        game = *new Game();    //Рандомный костыль(это не должно было работать)
         createWindow(winW, winH);
     }
     private:
