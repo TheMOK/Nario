@@ -12,17 +12,17 @@ namespace textWorker {
         fout.open(fileName, mode);                                                      //default ifstream: ios_base::in
     }                                                                                   //default ofstream: ios_base::out | ios_base::trunc
 
-    bool checkInFileEx(std::ifstream fin) //after using openFile
+    bool checkInEx(std::ifstream fin) //after using openFile
     {
         return fin.is_open();
     }
 
-    bool checkOutFileEx(std::ofstream fout)
+    bool checkOutEx(std::ofstream fout)
     {
         return fout.is_open();      //same
     }
 
-    bool checkIfEndOfInFileWasReached(std::ifstream fin)
+    bool checkIfEndReached(std::ifstream fin)
     {
         return fin.eof();
     }
@@ -32,14 +32,16 @@ namespace textWorker {
         return fin.tellg();
     }
 
-    void readFromFile(std::ifstream fin, char buffer[]) //alternative: count number of characters in buffer/output
+    void readFromFile(std::ifstream fin, char buff[], int bufflen) //alternative: count number of characters in buffer/output
     {
-        fin >> buffer;
+        if(fin.is_open())
+            fin >> buff;
     }
 
-    void writeInFile(std::ofstream fout, char output[])
+    void writeInFile(std::ofstream fout, char out[])
     {
-        fout << output;
+        if(fout.is_open())
+            fout << out;
     }
 
     void closeInFile(std::ifstream fin)
@@ -52,4 +54,14 @@ namespace textWorker {
         fout.close();
     }
 
+    void fillChArrIn(std::ifstream fin, char buff[], int bufflen, char stopfill)
+    {
+        if(fin.is_open())
+            fin.getline(buff, bufflen, stopfill);
+    }
+
+    void moveCursor(std::ifstream fin, int pos, std::ios_base::seekdir mode)
+    {
+        fin.seekg(pos, mode);
+    }
 }
