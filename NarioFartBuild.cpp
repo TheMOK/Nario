@@ -9,7 +9,7 @@ namespace graphicsWorker {
     }
 
     void drawRectangle(int left, int up, int right, int down, int color) {
-        switch(color) {
+        switch(color) {//артефакт
             case 0:
                 txSetFillColor(RGB(100, 100, 255));
                 txSetColor(RGB(100, 100, 255));
@@ -23,7 +23,7 @@ namespace graphicsWorker {
     }
 }
 
-class Cube {
+class Cube {//прородитель кубиков
     public:
     virtual void draw(int cubeSide, float x, int y) = 0;
 };
@@ -31,21 +31,21 @@ class Cube {
 class AirCube : public Cube {
     private:
     AirCube() {}
-    AirCube(const Cube&);
+    AirCube(const Cube&);//переопределенные конструкторы, создать экземпляр можно только через getInstance()
     AirCube& operator=(Cube&);
 
     public:
-    void draw(int cubeSide, float x, int y) {
+    void draw(int cubeSide, float x, int y) {//переопределенный draw() из Cube
         graphicsWorker::drawRectangle(cubeSide * x, cubeSide * y, cubeSide * (x + 1), cubeSide * (y + 1), 0);
     }
 
     static AirCube* getInstance() {
-        static AirCube instance;
+        static AirCube instance;//синглтон Майерса (инициализация статической переменной происходит только при первом вызове функции)
         return &instance;
     }
 };
 
-class DirtCube : public Cube {
+class DirtCube : public Cube {//тож самое, тока цвет другой
     private:
     DirtCube() {}
     DirtCube(const Cube&);
@@ -92,17 +92,17 @@ class Map {
     public:
     Map(int gameViewHeight) {
         cubeSide = gameViewHeight / mapHeight;
-        //initWithFile
+        //initWithFile (в следующей версии будем из файла читать)
         for(int x = 0; x < mapWidth; x++) {
             for(int y = 0; y < mapHeight; y++) {
                 if (x < mapWidth - 1 && x > 0 && y < mapHeight - 1) _cubes[x][y] = AirCube::getInstance();
                 else _cubes[x][y] = DirtCube::getInstance();
-                if (x % 10 == 0 && y == mapHeight - 2) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 15 == 0 && y == mapHeight - 3) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 20 == 0 && y == mapHeight - 4) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 25 == 0 && y == mapHeight - 5) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 30 == 0 && y == mapHeight - 6) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 35 == 0 && y == mapHeight - 7) _cubes[x][y] = DirtCube::getInstance();
+                if (x % 10 == 0 && y == mapHeight - 2) _cubes[x][y] = DirtCube::getInstance();//артефакт
+                if (x % 15 == 0 && y == mapHeight - 3) _cubes[x][y] = DirtCube::getInstance();//артефакт
+                if (x % 20 == 0 && y == mapHeight - 4) _cubes[x][y] = DirtCube::getInstance();//артефакт
+                if (x % 25 == 0 && y == mapHeight - 5) _cubes[x][y] = DirtCube::getInstance();//артефакт
+                if (x % 30 == 0 && y == mapHeight - 6) _cubes[x][y] = DirtCube::getInstance();//артефакт
+                if (x % 35 == 0 && y == mapHeight - 7) _cubes[x][y] = DirtCube::getInstance();//артефакт
             }
         }
     }
@@ -112,12 +112,12 @@ class Map {
             if (x == mapWidth) continue;
             for(int y = 0; y < mapHeight; y++) {
                 Cube *c = _cubes[x][y];
-                c->draw(cubeSide, x + centerX, y);
+                c->draw(cubeSide, x + centerX, y);//-> работает, как . , но лучше
             }
         }
     }
 
-    int getCubeSide() {
+    int getCubeSide() {//геттер
         return cubeSide;
     }
 };
@@ -135,7 +135,7 @@ class Game {
     }
 
     void drawCubes() {
-        static float x = 1;
+        static float x = 1;//артефакт, в следующей версии будем передавать сюда координату Nарио
         float px = x;
         if(px > 0) px = 0;
         if(px < 0 - Map::mapWidth + _gameViewWidth / _cubeMap.getCubeSide()) px = 0 - Map::mapWidth + _gameViewWidth / _cubeMap.getCubeSide();
@@ -157,7 +157,7 @@ class WinDirector {
         }
         WinDirector(const WinDirector&);
         WinDirector& operator=(WinDirector&);
-        Game game = Game(windowWidth, windowHeight, 50);
+        Game game = Game(windowWidth, windowHeight, 50);//не знаю, что здесь делает эта строка. потом уберем
     public:
     static WinDirector& getInstance() {
         static WinDirector instance;
