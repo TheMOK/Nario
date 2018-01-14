@@ -20,7 +20,7 @@ namespace graphicsWorker {
     }
 
     void drawRectangle(int left, int up, int right, int down, int color) {
-        switch(color) {
+        switch(color) {//артефакт
             case 0:
                 txSetFillColor (  SKY_BLUE);
                 txSetColor     (  SKY_BLUE);
@@ -249,18 +249,18 @@ class Cube {
 class AirCube : public Cube {
     private:
     AirCube() {}
-
+  
     AirCube(const Cube&) = delete;
 
     AirCube& operator=(const Cube&) = delete;
 
     public:
-    void draw(int cubeSide, float x, int y) {
+    void draw(int cubeSide, float x, int y) {//переопределенный draw() из Cube
         graphicsWorker::drawRectangle(cubeSide * x, cubeSide * y, cubeSide * (x + 1), cubeSide * (y + 1), 0);
     }
 
     static AirCube* getInstance() {
-        static AirCube instance;
+        static AirCube instance;//синглтон Майерса (инициализация статической переменной происходит только при первом вызове функции)
         return &instance;
     }
 };
@@ -320,6 +320,7 @@ class Map {
     public:
     Map(int gameViewHeight) : cubeSide(gameViewHeight / mapHeight) {
         //initWithFile (read from file in next version)
+        
         for(int x = 0; x < mapWidth; x++) {
             assert(0 <= x && x < mapWidth);
 
@@ -328,12 +329,12 @@ class Map {
 
                 if (x < mapWidth - 1 && x > 0 && y < mapHeight - 1) _cubes[x][y] = AirCube::getInstance();
                 else _cubes[x][y] = DirtCube::getInstance();
-                if (x % 10 == 0 && y == mapHeight - 2) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 15 == 0 && y == mapHeight - 3) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 20 == 0 && y == mapHeight - 4) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 25 == 0 && y == mapHeight - 5) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 30 == 0 && y == mapHeight - 6) _cubes[x][y] = DirtCube::getInstance();
-                if (x % 35 == 0 && y == mapHeight - 7) _cubes[x][y] = DirtCube::getInstance();
+                if (x % 10 == 0 && y == mapHeight - 2) _cubes[x][y] = DirtCube::getInstance();//artefact
+                if (x % 15 == 0 && y == mapHeight - 3) _cubes[x][y] = DirtCube::getInstance();//artefact
+                if (x % 20 == 0 && y == mapHeight - 4) _cubes[x][y] = DirtCube::getInstance();//artefact
+                if (x % 25 == 0 && y == mapHeight - 5) _cubes[x][y] = DirtCube::getInstance();//artefact
+                if (x % 30 == 0 && y == mapHeight - 6) _cubes[x][y] = DirtCube::getInstance();//artefact
+                if (x % 35 == 0 && y == mapHeight - 7) _cubes[x][y] = DirtCube::getInstance();//artefact
             }
         }
     }
@@ -353,7 +354,7 @@ class Map {
         }
     }
 
-    int getCubeSide() {
+    int getCubeSide() {//getter
         return cubeSide;
     }
 };
@@ -399,6 +400,12 @@ class Game {
         }
 
         nario.update();
+//         static float x = 1;//артефакт, в следующей версии будем передавать сюда координату Nарио
+//         float px = x;
+//         if(px > 0) px = 0;
+//         if(px < 0 - Map::mapWidth + _gameViewWidth / _cubeMap.getCubeSide()) px = 0 - Map::mapWidth + _gameViewWidth / _cubeMap.getCubeSide();
+//         _cubeMap.draw(px, _gameViewWidth);
+//         x-=0.05;
     }
 
     void drawMobs() {}
