@@ -1,14 +1,13 @@
 //TODO Gen map with init file; synchronize map movement with Nario's; create frames generation for
-//TODO Nario's movement, esp jump;
+//TODO Nario's movement;
 
 #include <txlib.h>
-#include <conio.h>
 
 #define if_DEBUG
 
 //Global constants
-const COLORREF RED = RGB(128,   0,   0);
-const COLORREF SKY_BLUE = RGB(100, 100, 255);
+const COLORREF RED = RGB        (128,   0,   0);
+const COLORREF SKY_BLUE = RGB   (100, 100, 255);
 const COLORREF GRASS_GREEN = RGB(  0, 200,   0);
 
 namespace graphicsWorker {
@@ -51,131 +50,193 @@ namespace graphicsWorker {
 
 class Nario {
     private:
-    static const int narioHeight =  40, narioWidth = 20, narioXSpeed = 10, narioYSpeed = 20;
+    static const int width = 20, x0 = 200, height =  40, ay = 3;
+    int xCenter = x0, yCenter = 0, dx = 0, dy = 0, y0 = 0;
+    bool onGround = true;
 
     public:
-    int narioXo = 65, narioYo = 0;
-    int narioXCenter = narioXo, narioYCenter;
 
-    Nario(int cubeSide) {
-        narioYo = cubeSide * 11 - narioHeight / 2;
-        narioYCenter = narioYo;
+    Nario(int cubeSide) : y0(cubeSide * 11 - height / 2), yCenter(y0) {}
+
+    inline int getXCenter() {
+        return xCenter;
+    }
+
+    inline int getX0() {
+        return x0;
+    }
+
+    inline void setDx(int speed) {
+        dx = speed;
+    }
+
+    inline void setDy(int speed) {
+        dy = speed;
+    }
+
+    inline void setOnGround(bool statement) {
+        onGround = statement;
+    }
+
+    inline bool getOnGround() {
+        return onGround;
     }
 
     void draw() {
-            graphicsWorker::drawRectangle(narioXCenter - narioWidth / 2 , narioYCenter - narioHeight / 2, narioXCenter + narioWidth / 2, narioYCenter + narioHeight / 2, 2);
+            graphicsWorker::drawRectangle(xCenter - width / 2 , yCenter - height / 2, xCenter + width / 2, yCenter + height / 2, 2);
     }
 
-    bool checkIfOnGround(int y) {
-        if(graphicsWorker::getPixel(narioXCenter, y) == GRASS_GREEN)
-            return true;
-        else
-            return false;
+    inline bool checkIfOnGround() {
+        for(int i = xCenter - width / 2; i <= xCenter + width / 2; i ++)
+            if(graphicsWorker::getPixel(i, yCenter + 1) == GRASS_GREEN)
+                return true;
+        return false;
     }
 
     bool checkIfWallLeft() {
-        int flag = 0;
-        for(int y = narioYCenter - narioHeight / 2; y <= narioYCenter + narioHeight / 2; y ++) {
-            assert(narioYCenter - narioHeight / 2 <= y && y <= narioYCenter + narioHeight / 2);
+        int flag = false;
+        for(int x = xCenter + dx - width / 2; x < xCenter - width / 2; x ++) {
+            assert( xCenter + dx - width / 2 <= x && x < xCenter - width / 2);
 
-            for(int x = narioXCenter - narioXSpeed - narioWidth / 2; x < narioXCenter - narioWidth / 2; x ++) {
-                assert( narioXCenter - narioXSpeed - narioWidth / 2 <= x && x < narioXCenter - narioWidth / 2);
+            for(int y = yCenter - height / 2; y <= yCenter + height / 2 - 1; y ++) {
+                assert(yCenter - height / 2 <= y && y <= yCenter + height / 2 - 1);
 
                 if(graphicsWorker::getPixel(x, y) == GRASS_GREEN) {
-                    flag = 1;
+                    flag = true;
                     break;
                 }
             }
         }
+
         return flag;
     }
 
     bool checkIfWallRight() {
-        int flag = 0;
-        for(int y = narioYCenter - narioHeight / 2; y <= narioYCenter + narioHeight / 2; y ++) {
-            assert(narioYCenter - narioHeight / 2 <= y && y <= narioYCenter + narioHeight / 2);
+        int flag = false;
+        for(int x = xCenter + dx + width / 2; x > xCenter + width / 2; x --) {
+            assert( xCenter + dx + width / 2 >= x && x > xCenter + width / 2);
 
-            for(int x = narioXCenter + narioXSpeed + narioWidth / 2; x > narioXCenter + narioWidth / 2; x --) {
-                assert( narioXCenter + narioXSpeed + narioWidth / 2 >= x && x > narioXCenter + narioWidth / 2);
+            for(int y = yCenter - height / 2; y <= yCenter + height / 2 - 1; y ++) {
+                assert(yCenter - height / 2 <= y && y <= yCenter + height / 2 - 1);
 
                 if(graphicsWorker::getPixel(x, y) == GRASS_GREEN) {
-                    flag = 1;
+                    flag = true;
                     break;
                 }
             }
         }
+
         return flag;
     }
 
-    void move() {
-        if(checkIfOnGround(narioYCenter + narioHeight / 2 + 1)) {
-            if(GetAsyncKeyState(VK_UP)) {
-                narioYCenter -= narioYSpeed * 3;
-                for(int y = narioYCenter; y <= narioYo + narioHeight / 2; y ++) {
-                    assert(narioYCenter <= y && y <= narioYo + narioHeight / 2);
+    void update() {
+        bool flag = true;
 
-                    if(checkIfOnGround(y + narioHeight / 2)) {
-                        narioYCenter = y;
+        if(! checkIfOnGround())
+            onGround = false;
+
+        if(dx < 0) {
+            if(! checkIfWallLeft())
+                xCenter += dx;
+            else {
+                flag = true;
+
+                for(int x = xCenter - width / 2; x >= xCenter - width / 2 + dx; x --) {
+                assert(xCenter - width / 2 >= x && x >= xCenter - width / 2 + dx);
+
+                    for(int y = yCenter + height / 2 - 1; y >= yCenter - height / 2; y --) {
+                        assert(yCenter + height / 2 - 1 >= y && y >= yCenter - height / 2);
+
+                        if(graphicsWorker::getPixel(x, y) == GRASS_GREEN) {
+                            xCenter = x + width / 2 + 1;
+                            flag = false;
+                            break;
+                        }
+
+                    }
+
+                    if(! flag)
                         break;
+                }
+            }
+        }
+
+        if(dx > 0) {
+            if(! checkIfWallRight()) {
+                xCenter += dx;
+            }
+            else {
+                flag = true;
+
+                for(int x = xCenter + width / 2; x <= xCenter + width / 2 + dx; x ++) {
+                assert(xCenter + width / 2 <= x && x <= xCenter + width / 2 + dx);
+
+                    for(int y = yCenter + height / 2 - 1; y >= yCenter - height / 2; y --) {
+                        assert(yCenter + height / 2 - 1 >= y && y >= yCenter - height / 2);
+
+                        if(graphicsWorker::getPixel(x, y) == GRASS_GREEN) {
+                            xCenter = x - width / 2 - 1;
+                            flag = false;
+                            break;
+                        }
+                    }
+
+                    if(! flag)
+                        break;
+                }
+            }
+        }
+
+
+
+
+        if(! onGround) {
+            dy += ay;
+            yCenter += dy;
+
+            if(dy < 0) {
+                for(int y = yCenter - height / 2 - dy; y >= yCenter - height / 2 + dy; y --) {
+                    assert(yCenter - height / 2 - dy >= y && y >= yCenter - height / 2 + dy);
+
+                    for(int x = xCenter - width / 2; x < xCenter + width / 2; x ++) {
+                        assert(xCenter - width / 2 <= x && x < xCenter + width / 2);
+
+                        if(graphicsWorker::getPixel(x, y) == GRASS_GREEN) {
+                            yCenter = y + height / 2 + 1;
+                            dy = 0;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(dy > 0) {
+                for(int y = yCenter + height / 2 - dy; y <= yCenter + height / 2 + dy; y ++) {
+                    assert(yCenter + height / 2 - dy <= y && y <= yCenter + height / 2 + dy);
+
+                    for(int x = xCenter - width / 2; x < xCenter + width / 2; x ++) {
+                        assert(xCenter - width / 2 <= x && x < xCenter + width / 2);
+
+                        if(graphicsWorker::getPixel(x, y) == GRASS_GREEN) {
+                            yCenter = y - height / 2;
+                            dy = 0;
+                            onGround = true;
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        if(GetAsyncKeyState(VK_LEFT) && (!checkIfWallLeft())) {
-            if(checkIfOnGround(narioYCenter + narioHeight / 2 + 1))
-                if(GetAsyncKeyState(VK_UP))
-                    narioYCenter -= narioYSpeed * 3;
-
-            narioXCenter -= narioXSpeed;
-        }
-        else if (GetAsyncKeyState (VK_LEFT) && checkIfWallLeft()) {
-            if(checkIfOnGround(narioYCenter + narioHeight / 2 + 1))
-                if(GetAsyncKeyState(VK_UP))
-                    narioYCenter -= narioYSpeed * 3;
-
-            for (int x = narioXCenter - narioWidth / 2 - narioXSpeed + 1; x < narioXCenter - narioWidth / 2; x ++) {
-                assert (narioXCenter - narioWidth / 2 - narioXSpeed + 1 <= x && x < narioXCenter - narioWidth / 2);
-
-                if (graphicsWorker::getPixel (x, narioYCenter) != GRASS_GREEN) {
-                    narioXCenter = x + narioWidth / 2;
-                    break;
-                }
-            }
+        if(yCenter + height / 2 > y0 + height / 2) {
+            yCenter = y0;
+            dy = 0;
+            onGround = true;
         }
 
-        if(GetAsyncKeyState(VK_RIGHT) && (!checkIfWallRight())) {
-            if(checkIfOnGround(narioYCenter + narioHeight / 2 + 1))
-                if(GetAsyncKeyState(VK_UP))
-                    narioYCenter -= narioYSpeed * 3;
-
-            narioXCenter += narioXSpeed;
-
-        }
-        else if (GetAsyncKeyState (VK_RIGHT) && checkIfWallRight()) {
-            if(checkIfOnGround(narioYCenter + narioHeight / 2 + 1))
-                if(GetAsyncKeyState(VK_UP))
-                    narioYCenter -= narioYSpeed * 3;
-
-            for (int x = narioXCenter + narioWidth / 2 + narioXSpeed - 1; x > narioXCenter + narioWidth / 2; x --) {
-                assert (narioXCenter + narioWidth / 2 + narioXSpeed - 1 >= x && x > narioXCenter + narioWidth / 2);
-
-                if (graphicsWorker::getPixel (x, narioYCenter) != GRASS_GREEN) {
-                    narioXCenter = x - narioWidth / 2;
-                    break;
-                }
-            }
-        }
-
-        for(int y = narioYCenter; y <= narioYo + narioHeight / 2; y ++) {
-            assert(narioYCenter <= y && y <= narioYo + narioHeight / 2);
-
-            if(checkIfOnGround(y + narioHeight / 2)) {
-                narioYCenter = y;
-                break;
-            }
-        }
+        dx = 0;
     }
+
 };
 
 // Cubes base class
@@ -257,8 +318,7 @@ class Map {
     Cube *_cubes[mapWidth][mapHeight];
 
     public:
-    Map(int gameViewHeight) {
-        cubeSide = gameViewHeight / mapHeight;
+    Map(int gameViewHeight) : cubeSide(gameViewHeight / mapHeight) {
         //initWithFile (read from file in next version)
         for(int x = 0; x < mapWidth; x++) {
             assert(0 <= x && x < mapWidth);
@@ -279,15 +339,16 @@ class Map {
     }
 
     void draw(float centerX, int gameViewWidth) {
-        for(int x = (int)floor(- centerX); x <= gameViewWidth / cubeSide + (int)floor(- centerX); x++) {
-            assert((int)floor(- centerX) <= x && x <= gameViewWidth / cubeSide + (int)floor(- centerX));
+        for(int x = (int)floor(centerX); x <= gameViewWidth / cubeSide + (int)floor(centerX); x++) {
+            assert((int)floor(centerX) <= x && x <= gameViewWidth / cubeSide + (int)floor(centerX));
 
             if (x == mapWidth) continue;
+
             for(int y = 0; y < mapHeight; y++) {
                 assert(0 <= y && y < mapHeight);
 
                 Cube *c = _cubes[x][y];
-                c->draw(cubeSide, x + centerX, y);
+                c->draw(cubeSide, x - centerX, y);
             }
         }
     }
@@ -304,28 +365,40 @@ class Game {
     Nario nario = Nario(0);
 
     public:
-    Game(int gameViewWidth, int gameViewHeight, int cubesVerticalNumber) {
+    Game(int gameViewWidth, int gameViewHeight, int cubesVerticalNumber) : _gameViewWidth(gameViewWidth), _gameViewHeight(gameViewHeight) {
         _cubeMap = Map(gameViewHeight);
         nario = Nario(_cubeMap.getCubeSide());
-        _gameViewWidth = gameViewWidth;
-        _gameViewHeight = gameViewHeight;
     }
 
     void drawCubes() {
-        static float x = 1;
-        float px = x;
-        if(px > 0) px = 0;
-        if(px < - Map::mapWidth + _gameViewWidth / _cubeMap.getCubeSide()) px = - Map::mapWidth + _gameViewWidth / _cubeMap.getCubeSide();
-        _cubeMap.draw(px, _gameViewWidth);
-//        x -= 0.05;
+        //TODO Make a working map scroll
+
+        float offSetX = (nario.getXCenter() - 3 * _cubeMap.getCubeSide()) / _cubeMap.getCubeSide();
+        float poffSetX = 0;
+        if(offSetX > 3)
+            poffSetX = offSetX - 3;
+        if(poffSetX > Map::mapWidth - _gameViewWidth / _cubeMap.getCubeSide())
+            poffSetX = Map::mapWidth - _gameViewWidth / _cubeMap.getCubeSide();
+        _cubeMap.draw(0, _gameViewWidth);
     }
 
-    void drawnario() {
+    void drawNario() {
         nario.draw();
     }
 
-    void movenario() {
-        nario.move();
+    void updateNario() {
+        if(GetAsyncKeyState(VK_LEFT))
+            nario.setDx(-10);
+
+        if(GetAsyncKeyState(VK_RIGHT))
+            nario.setDx(10);
+
+        if(GetAsyncKeyState(VK_UP) && nario.getOnGround()) {
+            nario.setDy(-20);
+            nario.setOnGround(false);
+        }
+
+        nario.update();
     }
 
     void drawMobs() {}
@@ -356,19 +429,20 @@ class WinDirector {
 
     void drawGame() {
         game.drawCubes();
-        game.drawnario();
+        game.drawNario();
     }
 
-    void moveObjs() {
-        game.movenario();
+    void updateObjs() {
+        game.updateNario();
     }
 };
 
 int main() {
+    int t = 100;
     while(true) {
+        WinDirector::getInstance().updateObjs();
         WinDirector::getInstance().drawGame();
-        if(_kbhit())
-            WinDirector::getInstance().moveObjs();
-        graphicsWorker::freezeWindow(100);
+        if(GetAsyncKeyState(VK_DOWN)) t = 10000;
+        graphicsWorker::freezeWindow(t);
     }
 }
